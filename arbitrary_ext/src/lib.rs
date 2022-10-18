@@ -8,9 +8,6 @@ use syn::{Attribute, DeriveInput, Field, Fields, Ident};
 #[proc_macro_derive(ArbitraryExt, attributes(arbitrary_ext))]
 pub fn derive(input: TokenStream) -> TokenStream {
     let derive_input: DeriveInput = syn::parse(input).unwrap();
-
-    println!("{:#?}", derive_input);
-    //unimplemented!();
     impl_arbitrary(&derive_input).into()
 }
 

@@ -1,7 +1,11 @@
 [package]
 name = "arbitrary_ext"
 version = "0.1.0"
+authors = ["Sergey Potapov <blake131313@gmail.com>"]
 edition = "2021"
+license = "MIT"
+description = "An extension of arbitrary that allows to define custom functions for single fields"
+categories = ["development-tools::testing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,4 +15,4 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0.47"
 quote = "1.0.21"
-syn = { version = "1.0.102", features = ["extra-traits"] }
+syn = { version = "1.0.102", features = [] }
