@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "arbitrary-ext",
+    "arbitrary_ext",
     "dummy",
 ]

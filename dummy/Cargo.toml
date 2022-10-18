@@ -6,5 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-arbitrary = "1.1.7"
+arbitrary = { version = "1.1.7", features = ["derive"] }
 arbitrary_ext = { path = "../arbitrary_ext" }
+arbtest = "0.1.2"

@@ -5,4 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+proc-macro = true
+
 [dependencies]
+proc-macro2 = "1.0.47"
+quote = "1.0.21"
+syn = { version = "1.0.102", features = ["extra-traits"] }
