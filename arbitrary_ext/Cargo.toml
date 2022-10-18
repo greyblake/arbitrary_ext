@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Sergey Potapov <blake131313@gmail.com>"]
 edition = "2021"
 license = "MIT"
-description = "An extension of arbitrary that allows to define custom functions for single fields"
+description = "Provides a way to derive Arbitrary trait but set custom implementation for single fields if necessary."
 categories = ["development-tools::testing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
