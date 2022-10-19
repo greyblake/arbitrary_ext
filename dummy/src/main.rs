@@ -1,6 +1,7 @@
 use arbitrary::{Arbitrary, Unstructured};
 use arbitrary_ext::ArbitraryExt;
 
+/*
 #[derive(Debug, ArbitraryExt)]
 struct Point {
     #[arbitrary_ext(with = "arbitrary_x")]
@@ -32,6 +33,23 @@ enum FooBar {
 fn arbitrary_x(u: &mut Unstructured) -> arbitrary::Result<i32> {
     u.int_in_range(0..=100)
 }
+*/
+
+#[derive(Debug, ArbitraryExt)]
+struct User {
+    #[arbitrary_ext(with = "arbitrary_username")]
+    user_name: UserName,
+
+    age: u16,
+}
+
+#[derive(Debug)]
+struct UserName(String);
+
+fn arbitrary_username(u: &mut Unstructured) -> arbitrary::Result<UserName> {
+    let name = String::arbitrary(u)?;
+    Ok(UserName(name))
+}
 
 fn main() {
     use rand::RngCore;
@@ -39,6 +57,7 @@ fn main() {
     rand::thread_rng().fill_bytes(&mut bytes);
     let mut u = Unstructured::new(&bytes);
 
+    /*
     let point = Point::arbitrary(&mut u).unwrap();
     println!("{point:?}");
 
@@ -47,4 +66,8 @@ fn main() {
 
     let foobar = FooBar::arbitrary(&mut u).unwrap();
     println!("{foobar:?}");
+    */
+
+    let user = User::arbitrary(&mut u).unwrap();
+    println!("{user:?}");
 }

@@ -232,10 +232,26 @@ fn construct_take_rest(fields: &Fields) -> TokenStream {
 
 fn gen_size_hint_method(input: &DeriveInput) -> TokenStream {
     let size_hint_fields = |fields: &Fields| {
-        let tys = fields.iter().map(|f| &f.ty);
+        let hints = fields.iter().map(|f| {
+            let ty = &f.ty;
+            match determine_field_constructor(f) {
+                FieldConstructor::Default | FieldConstructor::Value(_) => {
+                    quote!((0, Some(0)))
+                }
+                FieldConstructor::Arbitrary => {
+                    quote! { <#ty as arbitrary::Arbitrary>::size_hint(depth) }
+                }
+
+                // Note, that in this case it's hard to determine what size_hint must be, so size_of::<T>() is
+                // just an educated guess.
+                FieldConstructor::WithFunction(_) => {
+                    quote! { (::core::mem::size_of::<#ty>(), None) }
+                }
+            }
+        });
         quote! {
             arbitrary::size_hint::and_all(&[
-                #( <#tys as arbitrary::Arbitrary>::size_hint(depth) ),*
+                #( #hints ),*
             ])
         }
     };
