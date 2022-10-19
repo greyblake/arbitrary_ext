@@ -1,9 +1,9 @@
-mod field_attributes;
-
-use field_attributes::{determine_field_constructor, FieldConstructor};
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::*;
+
+mod field_attributes;
+use field_attributes::{determine_field_constructor, FieldConstructor};
 
 static ARBITRARY_LIFETIME_NAME: &str = "'arbitrary";
 
@@ -242,8 +242,9 @@ fn gen_size_hint_method(input: &DeriveInput) -> TokenStream {
                     quote! { <#ty as arbitrary::Arbitrary>::size_hint(depth) }
                 }
 
-                // Note, that in this case it's hard to determine what size_hint must be, so size_of::<T>() is
-                // just an educated guess.
+                // Note that in this case it's hard to determine what size_hint must be, so size_of::<T>() is
+                // just an educated guess, although it's gonna be inaccurate for dynamically
+                // allocated types (Vec, HashMap, etc.).
                 FieldConstructor::WithFunction(_) => {
                     quote! { (::core::mem::size_of::<#ty>(), None) }
                 }
@@ -292,101 +293,3 @@ fn gen_constructor_for_field(field: &Field) -> TokenStream {
         FieldConstructor::Value(value) => quote!(#value),
     }
 }
-
-/*
-
-mod field_attrs {
-    use super::*;
-
-    /// Determines how a value for a field should be constructed.
-    pub enum FieldConstructor {
-        /// Assume that Arbitrary is defined for the type of this field and use it (default)
-        Arbitrary,
-
-        /// Places `Default::default()` as a field value.
-        Default,
-
-        /// Use custom function to generate a value for a field.
-        WithFunction(TokenStream),
-
-        /// Set a field always to the given value.
-        Value(TokenStream),
-    }
-
-    pub fn determine_field_constructor(field: &Field) -> FieldConstructor {
-        let opt_attr = field_attrs::fetch_attr_from_field(field);
-        match opt_attr {
-            Some(attr) => field_attrs::parse_attribute(attr),
-            None => FieldConstructor::Arbitrary,
-        }
-    }
-
-    fn fetch_attr_from_field(field: &Field) -> Option<&Attribute> {
-        field.attrs.iter().find(|a| {
-            let path = &a.path;
-            let name = quote!(#path).to_string();
-            name == "arbitrary_ext"
-        })
-    }
-
-    fn parse_attribute(attr: &Attribute) -> FieldConstructor {
-        let group = {
-            let mut tokens_iter = attr.clone().tokens.into_iter();
-            let token = tokens_iter.next().expect("arbitrary_ext attribute cannot be empty");
-            match token {
-                TokenTree::Group(g) => g,
-                t => panic!("Expected group, got: {t:?})")
-            }
-        };
-
-        let mut tokens_iter = group.stream().into_iter();
-
-        let token = tokens_iter.next().expect("arbitrary_ext attribute cannot be empty");
-
-        match token.to_string().as_ref() {
-            "default" => FieldConstructor::Default,
-            "with" => {
-
-                let eq_sign = tokens_iter.next().unwrap();
-                assert_eq!(eq_sign.to_string(), "=", "invalid syntax for arbitrary_ext");
-                let lit_token = tokens_iter.next().unwrap();
-                let lit = unwrap_token_as_literal(lit_token);
-                let func_path = literal_to_string(lit, "with");
-                let func_path: TokenStream = func_path.parse().unwrap();
-
-                FieldConstructor::WithFunction(func_path)
-            }
-            "value" => {
-                let eq_sign = tokens_iter.next().unwrap();
-                assert_eq!(eq_sign.to_string(), "=", "invalid syntax for arbitrary_ext");
-                let lit_token = tokens_iter.next().unwrap();
-                let lit = unwrap_token_as_literal(lit_token);
-                let value = literal_to_string(lit, "value");
-                let value: TokenStream = value.parse().unwrap();
-
-                FieldConstructor::Value(value)
-            }
-            _ => panic!("Unknown options for arbitrary_ext: {}", token)
-        }
-    }
-
-    fn literal_to_string(lit: Literal, attr_name: &str) -> String {
-        let value = lit.to_string();
-        if value.starts_with('"') && value.ends_with('"') {
-            // Trim the first and the last chars (double quotes)
-            return value[1..(value.len() - 1)].to_string();
-        }
-        panic!(
-            "arbitrary_ext() expected attribute `{attr_name}` to be a string, but got: {}",
-            value
-        );
-    }
-
-    fn unwrap_token_as_literal(token: TokenTree) -> Literal {
-        match token {
-            TokenTree::Literal(lit) => lit,
-            something => panic!("Expeced a literal, got: {something}"),
-        }
-    }
-}
-*/
