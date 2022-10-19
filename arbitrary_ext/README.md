@@ -11,13 +11,16 @@ use arbitrary_ext::ArbitraryExt;
 
 #[derive(Debug, ArbitraryExt)]
 struct Point {
-    #[arbitrary_ext(custom = arbitrary_x)]
+    #[arbitrary_ext(with = "arbitrary_x")]
     x: i32,
 
     #[arbitrary_ext(default)]
     y: i32,
 
+    #[arbitrary_ext(value = "100 + 50")]
     z: i32,
+
+    a: i32,
 }
 
 fn arbitrary_x(u: &mut Unstructured) -> arbitrary::Result<i32> {
@@ -34,7 +37,7 @@ fn main() {
 Output:
 
 ```
-Point { x: 84, y: 0, z: 1869294 }
+Point { x: 84, y: 0, z: 150, a: 1869294 }
 ```
 
 ## Note
