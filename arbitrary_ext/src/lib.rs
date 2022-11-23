@@ -88,7 +88,7 @@ pub fn arbitrary_hash_set<T: Hash + Eq>(
 ) -> impl Fn(&mut Unstructured<'_>) -> arbitrary::Result<HashSet<T>> + Copy {
     move |u: &mut Unstructured<'_>| {
         let len = arbitrary_len(u)?;
-        let mut set = HashSet::new();
+        let mut set = HashSet::with_capacity(len);
         for _ in 0..len {
             let val = arbitrary_inner(u)?;
             set.insert(val);
@@ -102,7 +102,7 @@ pub fn arbitrary_vec<T>(
 ) -> impl Fn(&mut Unstructured<'_>) -> arbitrary::Result<Vec<T>> + Copy {
     move |u: &mut Unstructured<'_>| {
         let len = arbitrary_len(u)?;
-        let mut vec = Vec::new();
+        let mut vec = Vec::with_capacity(len);
         for _ in 0..len {
             let val = arbitrary_inner(u)?;
             vec.push(val);
@@ -116,7 +116,7 @@ pub fn arbitrary_vec_deque<T>(
 ) -> impl Fn(&mut Unstructured<'_>) -> arbitrary::Result<VecDeque<T>> + Copy {
     move |u: &mut Unstructured<'_>| {
         let len = arbitrary_len(u)?;
-        let mut vec = VecDeque::new();
+        let mut vec = VecDeque::with_capacity(len);
         for _ in 0..len {
             let val = arbitrary_inner(u)?;
             vec.push_back(val);
@@ -146,7 +146,7 @@ pub fn arbitrary_hash_map<K: Eq + Hash, V>(
 ) -> impl Fn(&mut Unstructured<'_>) -> arbitrary::Result<HashMap<K, V>> + Copy {
     move |u: &mut Unstructured<'_>| {
         let len = arbitrary_len(u)?;
-        let mut hashmap = HashMap::new();
+        let mut hashmap = HashMap::with_capacity(len);
         for _ in 0..len {
             let key = arbitrary_key(u)?;
             let value = arbitrary_value(u)?;
