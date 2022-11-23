@@ -1,18 +1,15 @@
 [package]
 name = "arbitrary_ext"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Sergey Potapov <blake131313@gmail.com>"]
 edition = "2021"
 license = "MIT"
-description = "Provides a way to derive Arbitrary trait but set custom implementation for single fields if necessary."
+description = "Provides combinator functions to generate standard collections with custom arbitrary function."
 categories = ["development-tools::testing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0.47"
-quote = "1.0.21"
-syn = { version = "1.0.102", features = [] }
+arbitrary = { version = "1.2", features = ["derive"]}

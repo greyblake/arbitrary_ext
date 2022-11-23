@@ -1,73 +1,108 @@
 use arbitrary::{Arbitrary, Unstructured};
-use arbitrary_ext::ArbitraryExt;
+use arbitrary_ext::{
+    arbitrary_btree_set,
+    arbitrary_hash_set,
+    arbitrary_option,
+    arbitrary_vec,
+    arbitrary_hash_map,
+    arbitrary_btree_map,
+    arbitrary_vec_deque,
+    arbitrary_linked_list,
+    arbitrary_binary_heap,
+};
 
-/*
-#[derive(Debug, ArbitraryExt)]
-struct Point {
-    #[arbitrary_ext(with = "arbitrary_x")]
-    x: i32,
+use std::collections::{BTreeSet, HashSet, HashMap, BTreeMap, VecDeque, LinkedList, BinaryHeap};
 
-    #[arbitrary_ext(default)]
-    y: i32,
 
-    #[arbitrary_ext(value = "100 + 50")]
-    z: i32,
+// Some foreign type, that by some reason does not implement Arbitrary trait.
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Number(u32);
 
-    a: i32,
+// Our custom function to generate arbitrary Number out of Unstructured.
+fn arbitrary_number(u: &mut Unstructured) -> arbitrary::Result<Number> {
+    let value = u.int_in_range(0..=1000)?;
+    Ok(Number(value))
 }
 
-#[derive(Debug, ArbitraryExt)]
-struct Age(#[arbitrary_ext(with = "arbitrary_x")] i32);
 
-#[derive(Debug, ArbitraryExt)]
-enum FooBar {
-    Foo(i32),
-    Bar {
-        #[arbitrary_ext(with = "arbitrary_x")]
-        x: i32,
-
-        y: i32,
-    },
+#[derive(Debug, Arbitrary, Hash, PartialEq, Eq, PartialOrd, Ord)]
+enum Player {
+    Alice,
+    Bob,
+    Julia,
+    Kate,
 }
 
-fn arbitrary_x(u: &mut Unstructured) -> arbitrary::Result<i32> {
-    u.int_in_range(0..=100)
-}
-*/
-
-#[derive(Debug, ArbitraryExt)]
-struct User {
-    #[arbitrary_ext(with = "arbitrary_username")]
-    user_name: UserName,
-
-    age: u16,
+fn arbitrary_player(u: &mut Unstructured) -> arbitrary::Result<Player> {
+    Player::arbitrary(u)
 }
 
-#[derive(Debug)]
-struct UserName(String);
+#[derive(Debug, Arbitrary)]
+struct Example {
+    #[arbitrary(with = arbitrary_number)]
+    number: Number,
 
-fn arbitrary_username(u: &mut Unstructured) -> arbitrary::Result<UserName> {
-    let name = String::arbitrary(u)?;
-    Ok(UserName(name))
+    #[arbitrary(with = arbitrary_option(arbitrary_number))]
+    option: Option<Number>,
+
+    #[arbitrary(with = arbitrary_vec(arbitrary_number))]
+    vec: Vec<Number>,
+
+    #[arbitrary(with = arbitrary_vec_deque(arbitrary_number))]
+    vec_deque: VecDeque<Number>,
+
+    #[arbitrary(with = arbitrary_linked_list(arbitrary_number))]
+    linked_list: LinkedList<Number>,
+
+    #[arbitrary(with = arbitrary_btree_set(arbitrary_option(arbitrary_number)))]
+    btree_set: BTreeSet<Option<Number>>,
+
+    #[arbitrary(with = arbitrary_hash_set(arbitrary_option(arbitrary_number)))]
+    hash_set: HashSet<Option<Number>>,
+
+    #[arbitrary(
+        with = arbitrary_hash_map(
+            arbitrary_player,
+            arbitrary_vec(arbitrary_number)
+        )
+    )]
+    hash_map: HashMap<Player, Vec<Number>>,
+
+    #[arbitrary(
+        with = arbitrary_btree_map(
+            arbitrary_player,
+            arbitrary_btree_set(arbitrary_number)
+        )
+    )]
+    btree_map: BTreeMap<Player, BTreeSet<Number>>,
+
+    #[arbitrary(with = arbitrary_binary_heap(arbitrary_number))]
+    binary_heap: BinaryHeap<Number>,
 }
 
 fn main() {
+    let example = gen_arbitrary();
+    println!("{example:#?}");
+}
+
+fn gen_arbitrary() -> Example {
     use rand::RngCore;
-    let mut bytes = [0u8; 2048];
+    //let mut bytes = [0u8; 65536];
+    let mut bytes = [0u8; 65_536];
     rand::thread_rng().fill_bytes(&mut bytes);
     let mut u = Unstructured::new(&bytes);
 
-    /*
-    let point = Point::arbitrary(&mut u).unwrap();
-    println!("{point:?}");
+    Example::arbitrary(&mut u).unwrap()
 
-    let age = Age::arbitrary(&mut u).unwrap();
-    println!("{age:?}");
+}
 
-    let foobar = FooBar::arbitrary(&mut u).unwrap();
-    println!("{foobar:?}");
-    */
-
-    let user = User::arbitrary(&mut u).unwrap();
-    println!("{user:?}");
+fn run_in_loop() {
+    let mut count = 0;
+    loop {
+        gen_arbitrary();
+        count += 1;
+        if count % 100_000 == 0 {
+            println!("Count = {count}");
+        }
+    }
 }
